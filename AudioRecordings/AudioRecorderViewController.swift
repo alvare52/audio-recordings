@@ -44,6 +44,15 @@ class AudioRecorderViewController: UIViewController {
         return formatting
     }()
     
+    var recordings: [Recording]? // Should be model controller but fuck it
+    
+    /// Recording that's passed in from the table view controller
+    var recording: Recording? {
+        didSet {
+            updateViews()
+        }
+    }
+    
     // MARK: - View Controller Lifecycle
     
     override func viewDidLoad() {
@@ -65,6 +74,9 @@ class AudioRecorderViewController: UIViewController {
     }
        
     func updateViews() {
+        print("updateViews")
+        guard isViewLoaded else {return}
+        
         playButton.isSelected = isPlaying
         recordButton.isSelected = isRecording
         let elapsedTime = audioPlayer?.currentTime ?? 0
@@ -75,6 +87,17 @@ class AudioRecorderViewController: UIViewController {
         timeSlider.value = Float(elapsedTime)
         timeSlider.minimumValue = 0
         timeSlider.maximumValue = Float(duration)
+        
+        title = timeIntervalFormatter.string(from: recording?.length ?? 0)
+        titleTextField.text = recording?.title ?? ""
+    }
+    
+    func updateUI() {
+        print("updateUI")
+        
+        title = timeIntervalFormatter.string(from: recording?.length ?? 0)
+        titleTextField.text = recording?.title ?? ""
+        
     }
     
     // MARK: - Timer

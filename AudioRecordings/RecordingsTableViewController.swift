@@ -12,9 +12,32 @@ import AVFoundation
 // AddRecordingSegue
 // DetailRecordingSegue
 
-class RecordingsTableViewController: UITableViewController {
+struct Recording {
+    var title: String
+    var recordingUrl: URL?
+    var timestamp: Date
+    var length: Double
+}
 
-    var dateFormatter: DateFormatter {
+class RecordingsTableViewController: UITableViewController {
+    
+    var recordings: [Recording] = [Recording(title: "Test",
+                                             recordingUrl: URL(string: "piano"),
+                                             timestamp: Date(),
+                                             length: 69)]
+
+    private lazy var timeIntervalFormatter: DateComponentsFormatter = {
+        // NOTE: DateComponentFormatter is good for minutes/hours/seconds
+        // DateComponentsFormatter is NOT good for milliseconds, use DateFormatter instead)
+        
+        let formatting = DateComponentsFormatter()
+        formatting.unitsStyle = .positional // 00:00  mm:ss
+        formatting.zeroFormattingBehavior = .pad
+        formatting.allowedUnits = [.minute, .second]
+        return formatting
+    }()
+    
+    private var dateFormatter: DateFormatter {
         let df = DateFormatter()
         df.dateStyle = .short
         return df
@@ -26,22 +49,18 @@ class RecordingsTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 1
-    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 6
+        return recordings.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
 
         // Configure the cell...
-        cell.textLabel?.text = "Recording Title"
-        cell.detailTextLabel?.text = "01:07 - \(dateFormatter.string(from: Date()))"
+        let recording = recordings[indexPath.row]
+        cell.textLabel?.text = recording.title
+        cell.detailTextLabel?.text = "\(dateFormatter.string(from: recording.timestamp))  - \(timeIntervalFormatter.string(from: recording.length) ?? "")"
         cell.accessoryType = .disclosureIndicator
 
         return cell
@@ -51,8 +70,14 @@ class RecordingsTableViewController: UITableViewController {
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        
+        if segue.identifier == "DetailRecordingSegue" {
+            print("DetailRecordingSegue")
+            if let detailVC = segue.destination as? AudioRecorderViewController, let indexPath = tableView.indexPathForSelectedRow {
+                detailVC.recordings = self.recordings
+                detailVC.recording = recordings[indexPath.row]
+            }
+        }
     }
 
 }

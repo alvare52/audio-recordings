@@ -33,6 +33,24 @@ class AudioRecorderViewController: UIViewController {
     @IBOutlet weak var timeSlider: UISlider!
     @IBOutlet weak var audioVisualizer: AudioVisualizer!
     
+    @IBAction func saveTapped(_ sender: UIBarButtonItem) {
+        print("savedTapped")
+        
+        guard let recordingTitle = titleTextField.text, !recordingTitle.isEmpty else {return}
+        // Check what mode it's in
+        if let recording = recording {
+            // Edit/View Mode
+            
+        } else {
+          // Add Mode
+            let newRecording = Recording(title: recordingTitle, recordingUrl: self.recordingURL, timestamp: Date(), length: 69)
+            
+            recordings.append(newRecording)
+        }
+        
+        navigationController?.popViewController(animated: true)
+    }
+    
     private lazy var timeIntervalFormatter: DateComponentsFormatter = {
         // NOTE: DateComponentFormatter is good for minutes/hours/seconds
         // DateComponentsFormatter is not good for milliseconds, use DateFormatter instead)
@@ -44,7 +62,13 @@ class AudioRecorderViewController: UIViewController {
         return formatting
     }()
     
-    var recordings: [Recording]? // Should be model controller but fuck it
+    private var dateFormatter: DateFormatter {
+        let df = DateFormatter()
+        df.dateStyle = .short
+        return df
+    }
+    
+    //var recordings: [Recording] = [] // Should be model controller but fuck it
     
     /// Recording that's passed in from the table view controller
     var recording: Recording? {
@@ -64,8 +88,10 @@ class AudioRecorderViewController: UIViewController {
         timeRemainingLabel.font = UIFont.monospacedDigitSystemFont(ofSize: timeRemainingLabel.font.pointSize,
                                                                    weight: .regular)
         
-        loadAudio()
+        
         updateViews()
+        
+        loadAudio()
         try? prepareAudioSession() // fix error handling for this
     }
     
@@ -88,16 +114,15 @@ class AudioRecorderViewController: UIViewController {
         timeSlider.minimumValue = 0
         timeSlider.maximumValue = Float(duration)
         
-        title = timeIntervalFormatter.string(from: recording?.length ?? 0)
-        titleTextField.text = recording?.title ?? ""
-    }
-    
-    func updateUI() {
-        print("updateUI")
+        //title = timeIntervalFormatter.string(from: recording?.length ?? 0)
+        if let recording = recording {
+            title = "\(dateFormatter.string(from: recording.timestamp))\'s Recording"
+            //self.recordingURL = recording.recordingUrl
+        } else {
+            title = "Add Recording"
+        }
         
-        title = timeIntervalFormatter.string(from: recording?.length ?? 0)
         titleTextField.text = recording?.title ?? ""
-        
     }
     
     // MARK: - Timer
@@ -142,6 +167,9 @@ class AudioRecorderViewController: UIViewController {
     func loadAudio() {
         let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!
         // Should crash if resources cannot be loaded
+        if let recording = recording {
+            audioPlayer = try? AVAudioPlayer(contentsOf: recording.recordingUrl ?? songURL)
+        }
         audioPlayer = try? AVAudioPlayer(contentsOf: songURL)
     }
     
@@ -246,17 +274,6 @@ class AudioRecorderViewController: UIViewController {
             requestPermissionOrStartRecording()
         }
     }
-    
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
 
 extension AudioRecorderViewController: AVAudioPlayerDelegate {

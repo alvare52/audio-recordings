@@ -149,7 +149,13 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="RBt-xi-Jwe"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Recording" id="E13-gN-zo8"/>
+                    <navigationItem key="navigationItem" title="Recording" id="E13-gN-zo8">
+                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="kIA-dH-Wdd">
+                            <connections>
+                                <action selector="saveTapped:" destination="2Vo-er-IAM" id="JCX-JV-2se"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="audioVisualizer" destination="wcI-0K-iKc" id="J8e-vy-hkQ"/>
                         <outlet property="playButton" destination="aWE-WI-BHi" id="WJu-hS-PcH"/>

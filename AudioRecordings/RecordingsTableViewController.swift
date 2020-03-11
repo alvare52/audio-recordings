@@ -19,12 +19,12 @@ struct Recording {
     var length: Double
 }
 
+var recordings: [Recording] = [Recording(title: "Test",
+                                         recordingUrl: URL(string: "piano"),
+                                         timestamp: Date(),
+                                         length: 69)]
+
 class RecordingsTableViewController: UITableViewController {
-    
-    var recordings: [Recording] = [Recording(title: "Test",
-                                             recordingUrl: URL(string: "piano"),
-                                             timestamp: Date(),
-                                             length: 69)]
 
     private lazy var timeIntervalFormatter: DateComponentsFormatter = {
         // NOTE: DateComponentFormatter is good for minutes/hours/seconds
@@ -45,6 +45,11 @@ class RecordingsTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tableView.reloadData()
     }
 
     // MARK: - Table view data source
@@ -74,7 +79,7 @@ class RecordingsTableViewController: UITableViewController {
         if segue.identifier == "DetailRecordingSegue" {
             print("DetailRecordingSegue")
             if let detailVC = segue.destination as? AudioRecorderViewController, let indexPath = tableView.indexPathForSelectedRow {
-                detailVC.recordings = self.recordings
+                //detailVC.recordings = self.recordings
                 detailVC.recording = recordings[indexPath.row]
             }
         }
